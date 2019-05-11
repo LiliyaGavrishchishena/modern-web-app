@@ -1,4 +1,7 @@
 const path = require('path');
+const ReactLoadablePlugin = require('react-loadable/webpack')
+  .ReactLoadablePlugin;
+
 module.exports = {
   // Файл, с которого начинается клиентская часть Universal web app
   entry: {
@@ -7,11 +10,18 @@ module.exports = {
   // Директория, в которой будет лежать билд webpack'а
   output: {
     path: path.resolve(__dirname, 'public'),
-    publicPath: '/'
+    publicPath: '/',
+    chunkFilename: '[name].bundle.js',
+    filename: '[name].js'
   },
   module: {
     // Используем babel-loader для компиляции кода из ECMAScript в понятный браузеру
     // JavaScript. Полученные файлы будут находиться в директории /public
     rules: [{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }]
-  }
+  },
+  plugins: [
+    new ReactLoadablePlugin({
+      filename: './public/react-loadable.json'
+    })
+  ]
 };

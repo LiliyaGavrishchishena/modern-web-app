@@ -1,11 +1,40 @@
 import React from 'react';
-import { hydrate } from 'react-dom'; //в React 16 теперь есть два разных метода для рендеринга на клиентской стороне. Метод render() для ситуаций, когда рендеринг выполняются полностью на клиенте, и метод hydrate() для случаев, когда рендеринг на клиенте основан на результатах серверного рендеринга. Благодаря обратной совместимости новой версии React, render() будет работать и в том случае, если ему передать то, что пришло с сервера.
+import { hydrate } from 'react-dom';
+import Loadable from 'react-loadable';
+import { Provider } from 'react-redux';
+import configureStore from './redux/configureStore';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app/App';
+import MobileApp from './mobileApp/App';
 
-hydrate(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>,
-  document.querySelector('#app')
-);
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import purple from '@material-ui/core/colors/purple';
+
+const state = window.__STATE__;
+const store = configureStore(state);
+
+const theme = createMuiTheme({
+  palette: {
+    primary: purple,
+    secondary: {
+      main: '#f44336'
+    }
+  },
+  typography: {
+    useNextVariants: true
+  }
+});
+
+Loadable.preloadReady().then(() => {
+  hydrate(
+    <Provider store={store}>
+      <MuiThemeProvider theme={theme}>
+        <BrowserRouter>
+          {state.mobile === null ? <App /> : <MobileApp />}
+        </BrowserRouter>
+      </MuiThemeProvider>
+    </Provider>,
+    document.querySelector('#app')
+  );
+});
